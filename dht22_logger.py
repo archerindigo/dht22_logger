@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import Adafruit_DHT
 import time
@@ -13,7 +13,9 @@ THINGSPEAK_KEY = "Your ThingSpeak API key"
 
 def thingspeak_write_data(temperature, humidity):
     api_url = "https://api.thingspeak.com/update.json"
-    data = {"api_key": THINGSPEAK_KEY, "field1": temperature, "field2": humidity}
+    data = {"api_key": THINGSPEAK_KEY,
+            "field1": round(temperature, 1),
+            "field2": round(humidity, 1)}
     response = requests.post(api_url, json=data)
     if response.ok:
         print("Posted to ThingSpeak")
