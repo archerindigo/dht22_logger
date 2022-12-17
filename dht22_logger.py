@@ -19,11 +19,14 @@ def thingspeak_write_data(temperature, humidity):
     data = {"api_key": THINGSPEAK_KEY,
             "field1": round(temperature, 1),
             "field2": round(humidity, 1)}
-    response = requests.post(api_url, json=data)
-    if response.ok:
-        print("Posted to ThingSpeak")
-    else:
-        print("Error posting data to ThingSpeak: \n" + response.json())
+    try:
+        response = requests.post(api_url, json=data)
+        if response.ok:
+            print("Posted to ThingSpeak")
+        else:
+            print("Error posting data to ThingSpeak: \n" + response.status_code)
+    except Exception as e:
+        print(f"Failed to post to ThingSpeak: {e}")
 
 def IoTPlotter_write_data(temperature, humidity):
     api_url = "http://iotplotter.com/api/v2/feed/" + IOTP_FEED_ID
@@ -34,11 +37,14 @@ def IoTPlotter_write_data(temperature, humidity):
     payload["data"]["Temperature"] = [{"value": round(temperature, 1)}]  # ["Temperature"] has to match the graph name in the feed
     payload["data"]["Humidity"] = [{"value": round(humidity, 1)}]
 
-    response = requests.post(api_url, headers=headers, data=json.dumps(payload))
-    if response.ok:
-        print("Posted to IoTPlotter")
-    else:
-        print("Error posting data to IoTPlotter! code: %d\n" % response.status_code)
+    try:
+        response = requests.post(api_url, headers=headers, data=json.dumps(payload))
+        if response.ok:
+            print("Posted to IoTPlotter")
+        else:
+            print("Error posting data to IoTPlotter! code: %d\n" % response.status_code)
+    except Exception as e:
+        print(f"Failed to post to IoTPlotter: {e}")
 
 if __name__ == "__main__":
     print("DHT22 logger v" + __version__)
@@ -47,7 +53,7 @@ if __name__ == "__main__":
         if humidity != None and temperature != None:
             t = time.strftime("%D %T", time.localtime(time.time()))
             print("[%s] Temp = %0.1f oC Humidity = %0.1f" % (t, temperature, humidity))
-            #thingspeak_write_data(temperature, humidity)    # TODO: do it in parallel
+            thingspeak_write_data(temperature, humidity)    # TODO: do it in parallel
             IoTPlotter_write_data(temperature, humidity)
         else:
             print("Failed to read DHT22 data")
